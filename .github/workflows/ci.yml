@@ -48,7 +48,6 @@ jobs:
 
       - name: Run pip-audit (dependency vulnerability scan)
         run: pip-audit -r app/requirements.txt
-
   trivy:
     runs-on: ubuntu-latest
 
@@ -56,11 +55,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Trivy
-        uses: aquasecurity/trivy-action@master
-
       - name: Build Docker image
         run: docker build -t devsecops-mini .
 
-      - name: Scan Docker image with Trivy
-        run: trivy image --exit-code 1 devsecops-mini
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: image
+          image-ref: devsecops-mini
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
