@@ -115,3 +115,24 @@ jobs:
           kubectl get deployments
           kubectl get pods
           kubectl get svc
+          
+  dast:
+    runs-on: [self-hosted, linux, x64, ubuntu]
+    needs: [deploy]
+
+    steps:
+      - name: Wait for application to be ready
+        run: sleep 15
+
+      - name: Start port-forward
+        run: |
+          kubectl port-forward service/devsecops-mini-service 8080:80 > port-forward.log 2>&1 &
+          sleep 10
+
+      - name: Run OWASP ZAP baseline scan
+        run: |
+          docker run --rm --network host ghcr.io/zaproxy/zaproxy:stable \
+            zap-baseline.py -t http://127.0.0.1:8080 -r zap_report.html
+
+      - name: Show ZAP report
+        run: cat zap_report.html
