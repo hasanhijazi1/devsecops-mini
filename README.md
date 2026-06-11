@@ -6,7 +6,7 @@ This project demonstrates a complete DevSecOps workflow using a minimal Python F
 
 This project was created to learn and demonstrate:
 
-- Building a basic API endpoint (/ping)
+- Building basic API endpoint (/ping)
 - Using Python virtual environments
 - Installing and managing dependencies using pip
 - Writing automated tests using pytest
