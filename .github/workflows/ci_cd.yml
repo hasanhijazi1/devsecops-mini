@@ -74,10 +74,10 @@ jobs:
       - name: Run container smoke test
         run: |
              docker run -d --name devsecops-mini-smoke -p 5001:5000 ${{ secrets.DOCKERHUB_USERNAME }}/devsecops-mini:latest
-          sleep 5
-          curl --fail http://localhost:5001/ping
-          docker stop devsecops-mini-smoke
-          docker rm devsecops-mini-smoke
+             sleep 5
+             curl --fail http://localhost:5001/ping
+             docker stop devsecops-mini-smoke
+             docker rm devsecops-mini-smoke
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
