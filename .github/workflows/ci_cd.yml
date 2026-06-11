@@ -129,6 +129,9 @@ jobs:
           kubectl port-forward service/devsecops-mini-service 8080:80 > port-forward.log 2>&1 &
           sleep 10
 
+      - name: Pull OWASP ZAP Docker image
+        run: docker pull ghcr.io/zaproxy/zaproxy:stable
+
       - name: Run OWASP ZAP baseline scan
         run: |
           docker run --rm --network host ghcr.io/zaproxy/zaproxy:stable \
