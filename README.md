@@ -167,7 +167,7 @@ curl http://localhost:8080/ping
 
 ## 🔁 CI/CD Workflow
 
-The project includes an automated CI/CD pipeline with GitHub Actions.
+The project includes an automated CI/CD pipeline with GitHub Actions .
 
 ### CI/CD stages
 
