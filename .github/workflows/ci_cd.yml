@@ -8,113 +8,113 @@ on:
     branches: ["main"]
 
 jobs:
-  # tests:
-  #   runs-on: [self-hosted, linux, x64, ubuntu]
+  tests:
+    runs-on: [self-hosted, linux, x64, ubuntu]
 
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-  #     - name: Build test image
-  #       run: docker build -f Dockerfile.test -t devsecops-mini-test .
+      - name: Build test image
+        run: docker build -f Dockerfile.test -t devsecops-mini-test .
 
-  #     - name: Run tests inside Docker
-  #       run: docker run --rm devsecops-mini-test
+      - name: Run tests inside Docker
+        run: docker run --rm devsecops-mini-test
 
-  # bandit:
-  #   runs-on: [self-hosted, linux, x64, ubuntu]
+  bandit:
+    runs-on: [self-hosted, linux, x64, ubuntu]
 
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-  #     - name: Create virtual environment
-  #       run: python3 -m venv .venv
+      - name: Create virtual environment
+        run: python3 -m venv .venv
 
-  #     - name: Install Bandit
-  #       run: .venv/bin/pip install bandit
+      - name: Install Bandit
+        run: .venv/bin/pip install bandit
 
-  #     - name: Run Bandit
-  #       run: .venv/bin/bandit -r app
+      - name: Run Bandit
+        run: .venv/bin/bandit -r app
 
-  # pip-audit:
-  #   runs-on: [self-hosted, linux, x64, ubuntu]
+  pip-audit:
+    runs-on: [self-hosted, linux, x64, ubuntu]
 
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-  #     - name: Create virtual environment
-  #       run: python3 -m venv .venv
+      - name: Create virtual environment
+        run: python3 -m venv .venv
 
-  #     - name: Install pip-audit
-  #       run: .venv/bin/pip install pip-audit
+      - name: Install pip-audit
+        run: .venv/bin/pip install pip-audit
 
-  #     - name: Run pip-audit
-  #       run: .venv/bin/pip-audit -r app/requirements.txt
+      - name: Run pip-audit
+        run: .venv/bin/pip-audit -r app/requirements.txt
 
-  # image-security:
-  #   runs-on: [self-hosted, linux, x64, ubuntu]
-  #   needs: [tests, bandit, pip-audit]
-  #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+  image-security:
+    runs-on: [self-hosted, linux, x64, ubuntu]
+    needs: [tests, bandit, pip-audit]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-  #     - name: Log in to Docker Hub
-  #       uses: docker/login-action@v3
-  #       with:
-  #         username: ${{ secrets.DOCKERHUB_USERNAME }}
-  #         password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-  #     - name: Build application image
-  #       run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/devsecops-mini:latest .
+      - name: Build application image
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/devsecops-mini:latest .
 
-  #     - name: Run container smoke test
-  #       run: |
-  #            docker run -d --name devsecops-mini-smoke -p 5001:5000 ${{ secrets.DOCKERHUB_USERNAME }}/devsecops-mini:latest
-  #            sleep 5
-  #            curl --fail http://localhost:5001/ping
-  #            docker stop devsecops-mini-smoke
-  #            docker rm devsecops-mini-smoke
+      - name: Run container smoke test
+        run: |
+             docker run -d --name devsecops-mini-smoke -p 5001:5000 ${{ secrets.DOCKERHUB_USERNAME }}/devsecops-mini:latest
+             sleep 5
+             curl --fail http://localhost:5001/ping
+             docker stop devsecops-mini-smoke
+             docker rm devsecops-mini-smoke
 
-  #     - name: Run Trivy vulnerability scanner
-  #       uses: aquasecurity/trivy-action@master
-  #       with:
-  #         image-ref: ${{ secrets.DOCKERHUB_USERNAME }}/devsecops-mini:latest
-  #         scan-type: image
-  #         severity: HIGH,CRITICAL
-  #         ignore-unfixed: true
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ secrets.DOCKERHUB_USERNAME }}/devsecops-mini:latest
+          scan-type: image
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
 
-  #     - name: Push application image
-  #       run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/devsecops-mini:latest
+      - name: Push application image
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/devsecops-mini:latest
 
-  # deploy:
-  #   runs-on: [self-hosted, linux, x64, ubuntu]
-  #   needs: [image-security]
-  #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+  deploy:
+    runs-on: [self-hosted, linux, x64, ubuntu]
+    needs: [image-security]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-  #     - name: Deploy Kubernetes manifests
-  #       run: |
-  #         kubectl apply -f deployment.yaml
-  #         kubectl apply -f service.yaml
+      - name: Deploy Kubernetes manifests
+        run: |
+          kubectl apply -f deployment.yaml
+          kubectl apply -f service.yaml
 
-  #     - name: Restart deployment to pull latest image
-  #       run: kubectl rollout restart deployment/devsecops-mini
+      - name: Restart deployment to pull latest image
+        run: kubectl rollout restart deployment/devsecops-mini
 
-  #     - name: Wait for rollout to finish
-  #       run: kubectl rollout status deployment/devsecops-mini --timeout=120s
+      - name: Wait for rollout to finish
+        run: kubectl rollout status deployment/devsecops-mini --timeout=120s
 
-  #     - name: Show resources
-  #       run: |
-  #         kubectl get deployments
-  #         kubectl get pods
-  #         kubectl get svc
+      - name: Show resources
+        run: |
+          kubectl get deployments
+          kubectl get pods
+          kubectl get svc
           
   dast:
     runs-on: [self-hosted, linux, x64, ubuntu]
