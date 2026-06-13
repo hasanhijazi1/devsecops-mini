@@ -129,7 +129,7 @@ jobs:
         run: |
           kubectl port-forward service/devsecops-mini-service 8080:80 > port-forward.log 2>&1 &
           sleep 10
-          
+
       - name: Verify app
         run: |
           cat port-forward.log
@@ -138,7 +138,11 @@ jobs:
           kubectl get endpoints
           curl -v http://127.0.0.1:8080
 
-
+      - name: Verify target from inside Docker
+        run: |
+          docker run --rm --network host curlimages/curl \
+            curl -I http://127.0.0.1:8080
+            
       - name: Pull OWASP ZAP Docker image
         run: docker pull ghcr.io/zaproxy/zaproxy:stable
 
