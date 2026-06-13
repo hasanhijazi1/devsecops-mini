@@ -127,22 +127,9 @@ jobs:
 
       - name: Start port-forward
         run: |
-          kubectl port-forward service/devsecops-mini-service 8080:80 > port-forward.log 2>&1 &
+          kubectl port-forward service/devsecops-mini-service 8080:80 --address 0.0.0.0 > port-forward.log 2>&1 &
           sleep 10
 
-      - name: Verify app
-        run: |
-          cat port-forward.log
-          kubectl get pods
-          kubectl get svc
-          kubectl get endpoints
-          curl -v http://127.0.0.1:8080
-
-      - name: Verify target from inside Docker
-        run: |
-          docker run --rm --network host curlimages/curl \
-            curl -I http://127.0.0.1:8080
-            
       - name: Pull OWASP ZAP Docker image
         run: docker pull ghcr.io/zaproxy/zaproxy:stable
 
@@ -151,11 +138,10 @@ jobs:
          mkdir -p zap-output
 
          docker run --rm \
-          --network host \
           -v $(pwd)/zap-output:/zap/wrk \
           ghcr.io/zaproxy/zaproxy:stable \
           zap-baseline.py \
-          -t http://127.0.0.1:8080 \
+          -t http://172.28.60.82:8080 \
           -r zap_report.html
 
       - name: Show ZAP report
