@@ -2,6 +2,10 @@ from flask import Flask, jsonify
 
 app = Flask(__name__)
 
+@app.get("/")
+def home():
+    return jsonify({"status": "ok"}), 200
+
 @app.get("/ping")
 def ping():
     return jsonify({"message": "pong!"})
